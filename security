@@ -1,0 +1,118 @@
+Oauth2 is an authorization framework allowing third-party applications to access resources on behalf of a user without exposing their credentials.
+it provides a token-based authentication mechanism that supports different types of tokens.
+it has many concepts :
+
+- Resource Owner (User): the user or system that owns the protected resources and can grant access to them.
+
+- Client (Application) : the client is the system that requires access to the protected resources. To access resources, the Client must hold the
+                         appropriate Access Token.
+
+- Authorization Server : this server receives requests from the Client for Access Tokens and issues them upon successful authentication and consent
+                         by the Resource Owner. The authorization server exposes two endpoints: the Authorization endpoint, which handles the interactive
+                         authentication and consent of the user, and the Token endpoint, which is involved in a machine to machine interaction.
+
+- Resource Server : a server that protects the user’s resources and receives access requests from the Client. It accepts and validates an Access Token
+                    from the Client and returns the appropriate resources to it.
+
+- Scopes : define the level of access or permissions that specify what an application is allowed to do with the user's data. they are granted by the
+           resource owner and communicated during the authorization process. they limit the access that an application can request. This helps to
+           ensure that an application only has the necessary permissions to do its job
+
+
+
+
+
+
+
+How does Oauth2 work ?
+Using Oauth2, access requests are initiated by the Client, e.g., a mobile app, website, smart TV app, desktop application, etc. The token request,
+exchange, and response follow this general flow:
+
+The Client requests authorization (authorization request) from the Authorization server, supplying the client id and secret to as identification,
+it also provides the scopes and an endpoint URI (redirect URI) to send the Access Token or the Authorization Code to.
+
+The Authorization server authenticates the Client and verifies that the requested scopes are permitted.
+The Resource owner interacts with the Authorization server to grant access.
+
+The Authorization server redirects back to the Client with either an Authorization Code or Access Token, depending on the grant type, as it will
+be explained in the next section. A Refresh Token may also be returned.
+
+with the Access Token, the Client requests access to the resource from the Resource server.
+
+
+
+
+
+
+
+
+
+OpenId connect ?
+OpenID Connect (OIDC) is an identity layer built on top of the OAuth2 protocol that allows clients (such as web or mobile applications) to verify
+the identity of an end user based on the authentication performed by an authorization server. Additionally, it provides basic profile information
+about the user.
+It has so many concepts :
+
+- OAuth2 Protocol: OpenID Connect extends OAuth2, which is primarily focused on authorization, by adding authentication capabilities. OAuth2 deals
+                   with granting access to resources, whereas OpenID Connect deals with verifying the user's identity.
+
+- ID Token: that contains information about the authenticated user, such as their unique identifier (sub), their authentication time, and other claims
+            (such as their email or name). it is cryptographically signed by the identity provider (the server that handles the authentication) and is
+            passed to the client. The client can validate this token to confirm the user’s identity.
+
+- Identity Provider (IdP): The Identity Provider (or OpenID Provider, OP) is the entity that authenticates the user and issues the ID Token and access
+                           token. Examples include Google, Microsoft, and other services that provide identity verification.
+
+- Relying Party (RP): The Relying Party (RP) is the client application (e.g., a web or mobile app) that wants to verify the user’s identity and access
+                      resources on their behalf.
+
+- UserInfo Endpoint: After the ID Token is obtained, the client can request additional profile information about the user from the UserInfo Endpoint
+                     provided by the Identity Provider. This endpoint returns claims about the authenticated user, such as their name, email, and other
+                     information.
+
+- Claims: Claims are pieces of information about the user, such as their name, email, or profile picture, included in the ID Token or retrieved from the
+          UserInfo Endpoint. These claims allow the client application to understand more about the authenticated user.
+
+
+
+
+
+
+
+
+OpenID Connect Flow:
+OpenID Connect can use several different OAuth 2.0 flows, depending on the type of application (e.g., web app, mobile app, server-based app). The two most
+common flows are:
+
+- Authorization Code Flow (Recommended for server-side applications):
+        The client application redirects the user to the Identity Provider (auth server) for authentication.
+        The user logs in, and the Identity Provider redirects back to the client with an authorization code.
+        The client exchanges the authorization code for an ID Token (and possibly an access token).
+        The client validates the ID Token to authenticate the user.
+
+- Implicit Flow (For single-page apps or browser-based apps):
+        The client directly receives the ID Token from the Identity Provider without exchanging an authorization code.
+        This flow is simpler but less secure compared to the Authorization Code Flow.
+
+- Hybrid Flow (Combination of Authorization Code and Implicit Flow):
+        The client receives both an authorization code and an ID Token at the same time, giving flexibility for certain use cases.
+
+
+
+
+
+
+
+
+what is keycloak ?
+Keycloak is an open-source identity and access management (IAM) solution that provides secure authentication and authorization services for modern
+applications and services. Developed by Red Hat, Keycloak allows developers to integrate Single Sign-On (SSO), OAuth2, OpenID Connect, and SAML into
+their applications without having to implement complex authentication code from scratch.
+
+First the client (external service or api) is going to connect with the authorization server (keycloak) with client credentials and then get an access token,
+then the client invokes a path in the gateway service using this access token, then the gateway service is going to interact with keycloak  validates
+the access token, and once it is validated, it will forward the request to the corresponding microservice to handle it.
+
+Realm is the environment that contains the user or client credentials.
+
+

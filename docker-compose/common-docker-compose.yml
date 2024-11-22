@@ -1,0 +1,20 @@
+services:
+  common-network:
+    networks:
+      - ecommerce
+
+  common-network-deploy:
+    extends:
+      service: common-network
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+
+  common-network-deploy-configserver:
+    extends:
+      service: common-network-deploy
+    environment:
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+      SPRING_RABBITMQ_HOST: rabbitmq

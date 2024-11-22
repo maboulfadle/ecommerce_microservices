@@ -1,0 +1,162 @@
+services:
+  configserver:
+    container_name: configserver
+    image: maboulfadle/configserver:v1
+    ports:
+      - '8071:8071'
+    healthcheck: { test: 'curl --fail --silent localhost:8071/actuator/health/readiness | grep UP || exit 1', interval: 10s, timeout: 5s, retries: 10, start_period: 10s }
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+    extends:
+      file: ../common-docker-compose.yml
+      service: common-network-deploy
+
+
+  gatewayserver:
+    container_name: gatewayserver
+    image: maboulfadle/gatewayserver:v1
+    ports:
+      - '8072:8072'
+    depends_on:
+      products:
+        condition: service_healthy
+      orders:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_DATA_REDIS__HOST: redis
+    extends:
+      file: ../common-docker-compose.yml
+      service: common-network-deploy-configserver
+
+
+  eurekaserver:
+    container_name: eurekaserver
+    image: maboulfadle/eurekaserver:v1
+    ports:
+      - '8070:8070'
+    healthcheck: { test: 'curl --fail --silent localhost:8070/actuator/health/readiness | grep UP || exit 1', interval: 10s, timeout: 5s, retries: 10, start_period: 10s }
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    extends:
+      file: ../common-docker-compose.yml
+      service: common-network-deploy
+
+
+  products:
+    container_name: products-ms
+    image: maboulfadle/products-ms:v1
+    ports:
+      - '8080:8080'
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+    healthcheck: { test: 'curl --fail --silent localhost:8080/actuator/health/readiness | grep UP || exit 1', interval: 10s, timeout: 5s, retries: 10, start_period: 10s }
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/products
+    extends:
+      file: ../common-docker-compose.yml
+      service: common-network-deploy-configserver
+
+
+  orders:
+    container_name: orders-ms
+    image: maboulfadle/orders-ms:v1
+    ports:
+      - '8090:8090'
+    depends_on:
+      mongodb:
+        condition: service_started
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+    healthcheck: { test: 'curl --fail --silent localhost:8090/actuator/health/readiness | grep UP || exit 1', interval: 10s, timeout: 5s, retries: 10, start_period: 10s }
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATA_MONGODB_HOST: mongodb
+    extends:
+      file: ../common-docker-compose.yml
+      service: common-network-deploy-configserver
+
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - '27017:27017'
+    env_file: .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${mongo_database_user}
+      MONGO_INITDB_ROOT_PASSWORD: ${mongo_database_pass}
+    volumes:
+      - mongodb:/data/db
+      - mongoconfig:/data/configdb
+    extends:
+      file: ../common-docker-compose.yml
+      service: common-network
+
+
+  mysqldb:
+    image: mysql
+    container_name: mysqldb
+    restart: unless-stopped
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_USERNAME: ${mysql_database_user}
+      MYSQL_ROOT_PASSWORD: ${mysql_database_pass}
+      MYSQL_DATABASE: ${mysql_database}
+    env_file: .env
+    volumes:
+      - mysqldb:/var/lib/mysql
+    healthcheck: { test: 'mysqladmin ping -h localhost', timeout: 10s, retries: 2 }
+    extends:
+      file: ../common-docker-compose.yml
+      service: common-network
+
+
+  rabbitmq:
+    image: rabbitmq
+    container_name: rabbitmq
+    ports:
+      - '5672:5672'
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    healthcheck: { test: 'rabbitmq-diagnostics check_port_connectivity', interval: 10s, timeout: 5s, retries: 10, start_period: 5s }
+    extends:
+      file: ../common-docker-compose.yml
+      service: common-network
+
+
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - '6379:6379'
+    healthcheck: { test: 'redis-cli ping | grep PONG', timeout: 10s, retries: 10 }
+    extends:
+      file: ../common-docker-compose.yml
+      service: common-network
+
+
+volumes:
+  mongodb: {}
+  mongoconfig: {}
+  mysqldb: {}
+
+
+networks:
+  ecommerce:
+    driver: bridge

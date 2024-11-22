@@ -1,0 +1,49 @@
+If an external client(s) want to communicate with one or more microservices, there are multiple challenges :
+- the client must be aware of each microservice endpoint, ip address and port number
+- cross-cutting repeating concerns (security, logging, monitoring/metrics, and resiliency....)
+- rooting (defining dynamic rooting rules based on some criteria as http headers, params)
+
+so to overcome this challenge, we need to make sure there is a single entry point into our microservice network which called Edge server or gateway
+
+Edge server are applications done at the edge of a system, responsible for implementing functionalities such as API Gateway and handling cross-cutting concerns.
+when using these servers, it becomes possible to implement :
+     - Request validation
+     - to prevent cascading failures when invoking downstream services, allowing retries and timeouts.
+     - the enforcement of the quota policies
+     - dynamic routing
+     - modification of requests and responses
+     - authorisation and authentication mechanisms at the edge
+     - Exception handling
+     - Cache using some tools (Redis)
+     - Logging and monitoring using some observability tools (Grafana)
+
+
+
+
+
+
+To implement an Edge server inside spring-boot based microservices architecture, spring cloud has released the spring cloud gateway project, that
+provides a libraries for building an API Gateway on top of Spring webFlux. The project aims to provide a simple, and effective way to route to APIs
+and provide cross cutting concerns to them such as: security, monitoring/metrics, and resiliency.
+The project has multiple features such as :
+    - built on Spring Framework and Spring Boot
+    - able to match routes on any request attribute.
+    - predicates and filters are specific to routes.
+    - circuit breaker integration.
+    - discovery client integration
+    - easy to write predicates and filters
+    - request rate limiting
+
+
+Spring Cloud Gateway is the preferred api gateway compared to the zuul, because it built on spring reactive webFlux, provides circuit breaker integration
+service discovery with Eureka, non-blocking in nature, and has superior performance compared to Zuul.
+
+
+
+when a client make a request to the spring cloud gateway, the gateway handler mapping checks if the requests matches a predefined route, then the
+request pass through a number of predefined predicates and pre-filters to check if it fulfill a set of given condition before forwarding the request to
+the actual microservice.
+Once the microservice processed the request, it is going to generate a response that will be intercepted by post-filters, so before sending the response
+to the actual client application, you may want to modify some response or you may want to perform some validations. All such validations and business logic
+you can define inside the post filters and after executing all the post filters configured by the developer, the same response will be sent back to the
+gateway handler mapping and from gateway handler mapping it will send to the actual client application.

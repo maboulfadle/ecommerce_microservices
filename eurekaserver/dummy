@@ -1,0 +1,36 @@
+# Eureka self-preservation to avoid network traps :
+In a distributed system using Eureka, each microservice instance periodically sends heartbeats signal to Eureka server to indicate
+that it is still alive and functional, if the Eureka server does not receive a heartbeat from a microservice instance in time frame,
+it assumes that the instance has become inactive or has crashed.
+
+But in certain situations, network glitches or temporary system delays may cause the Eureka server to miss some heartbeats,
+leading to a false expiration of the instances. This can result an unnecessary evictions of healthy microservice instances
+from the registry, causing instability and perturbation in the system.
+
+To overcome this issue, Eureka server enter into self-preservation mode, so the registered entries will not be removed even if
+the eureka server stops receiving heartbeats from some of these instances, this prevents the eureka server from evicting all the
+instances due to temporary network glitches or delays.
+
+In self-preservation mode, the eureka server continues to serve the registered instances to client applications, even if it suspects
+that some instances are no longer available, this helps maintain the stability and availability of the service registry, ensuring that
+clients can still discover and interact with the available instances.
+
+The self-preservation mode never expires, until and unless the down microservices are come back, or the network issue get solved.
+This is because Eureka server will not expire the instances till it is above the threshold number of registered instances.
+
+
+
+
+
+
+# To enable the eureka registration for a microservice :
+eureka:
+  instance:
+    prefer-ip-address: true
+
+  client:
+    service-url:
+      defaultZone: http://localhost:8070/eureka/
+
+    fetch-registry: true
+    register-with-eureka: true

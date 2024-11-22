@@ -1,0 +1,91 @@
+server:
+  port: 8080
+
+
+spring:
+  application:
+    name: 'products'
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/products
+    driverClassName: com.mysql.cj.jdbc.Driver
+
+  h2:
+    console:
+      enabled: true
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  config:
+    import: 'optional:configserver:http://localhost:8071/'
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+  health:
+    livenessstate:
+      enabled: true
+
+    readinessstate:
+      enabled: true
+
+  endpoint:
+    shutdown:
+      enabled: true
+
+    health:
+      probes:
+        enabled: true
+
+  info:
+    env:
+      enabled: true
+
+
+eureka:
+  instance:
+    prefer-ip-address: true
+
+  client:
+    service-url:
+      defaultZone: http://localhost:8070/eureka/
+
+    fetch-registry: true
+    register-with-eureka: true
+
+
+logging:
+  level:
+    com:
+      training:
+        products: DEBUG
+
+
+resilience4j.retry:
+  instances:
+    getProduct:
+      max-attempts: 10
+      wait-duration: 100
+      exponential-max-wait-duration: 1s
+      enable-exponential-backoff: true
+      exponential-backoff-multiplier: 2
+      ignore-exceptions:
+        - java.lang.NullPointerException
+        - java.lang.ClassCastException
+      retry-exceptions:
+        - java.util.concurrent.TimeoutException
+
+
+resilience4j.ratelimiter:
+  instances:
+    buildInformationRateLimiter:
+      timeout-duration: 1000
+      limit-refresh-period: 5000
+      limit-for-period: 1 # for every 5 seconds, one request is permitted

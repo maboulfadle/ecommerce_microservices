@@ -1,0 +1,80 @@
+server:
+  port: 8072
+
+spring:
+  application:
+    name: 'gatewayserver'
+
+  config:
+    import: 'optional:configserver:http://localhost:8071/'
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      httpclient:
+        connect-timeout: 1000
+        response-timeout: 5s
+
+  data:
+    redis:
+      connect-timeout: 2s
+      host: localhost
+      port: 6379
+      timeout: 1s
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: 'http://localhost:8060/realms/master/protocol/openid-connect/certs'
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+  endpoint:
+    gateway:
+      enabled: true
+
+
+eureka:
+  instance:
+    prefer-ip-address: true
+
+  client:
+    service-url:
+      defaultZone: 'http://localhost:8070/eureka/'
+
+    fetch-registry: true
+    register-with-eureka: true
+
+
+resilience4j.circuitbreaker:
+  instances:
+    ordersCircuitBreaker:
+      sliding-window-size: 10 # the number of requests it has to monitor initially before it tries to change the state from close to open.
+      permitted-number-of-calls-in-half-open-state: 2 # the number of requests (partial traffic) it has to allow when it on half_open state.
+      failure-rate-threshold: 50 # the percentage of failed requests, in order to change the state from closed to open.
+      wait-duration-in-open-state:
+        seconds: 10 # the amount of wait time whenever it tries to move to the half open state and allow the partial traffic.
+
+
+logging:
+  level:
+    com:
+      training:
+        gatewayserver: DEBUG
+
+
+jwt:
+  auth2:
+    converter:
+      resource-id: microservices-client-cc
+      principal-attribute: principal_username

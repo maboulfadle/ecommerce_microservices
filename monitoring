@@ -1,0 +1,38 @@
+Observability is the ability to understand the internal state of a system by observing its outputs, in the context of microservices, observability
+is achieved by collection and analyzing data from a variety of sources, such as metrics, logs and traces.
+
+The 3 pillars of observability are :
+- metrics : are quantitative measurements of the health of the system, they could be used to track things like CPU usage, memory usage and response time.
+- Logs    : are records of events that occur in the system, they could be used to track errors, exceptions...
+- Traces  : are records of the path that a request follows through the system, they could be used to check request's performance and identify bottlenecks.
+
+
+
+
+
+
+Monitoring in microservices involves checking the telemetry data available for the application and defining alerts for known failure states. this process
+collects and analyzes data from a system to identify and troubleshoot problem, as well as track the health of each microservice and the overall
+microservices network.
+
+monitoring in microservices is important as it allows you to :
+- Identify and troubleshoot problems
+- Track the health of the microservices
+- Optimize the microservices
+
+
+
+
+
+
+monitoring has reactive approach to identify and troubleshoot the problems based on metrics, traces and logs
+observability has a proactive approach to understand how a system works, based on metrics, traces, logs and other data sources.
+
+For instance if you take the example of an iceberg, whatever what you can easily see at the top we can name it monitoring, but the hidden part of the iceberg
+you can consider it as observability as we need to dive in the logs and other data source to identify the source of the problem or how the system works.
+
+
+
+
+
+

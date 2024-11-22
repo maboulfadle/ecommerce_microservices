@@ -1,0 +1,32 @@
+GraalVM compiles the Java applications ahead of time into standalone binaries. These binaries are smaller, start up to 100x faster,
+provide peak performance with no warmup, and use less memory and CPU than applications running on a Java virtual machine.
+
+GraalVM reduces the surface of the application. It excludes unused classes, methods, and fields from the application binary. It restricts
+reflection and other dynamic Java language features to build time only. It does not load any unknown code at runtime.
+
+The profile-guided optimization and the Garbage-First garbage collector allow getting lower latency and better peak performance compared
+to applications running on a Java virtual machine.
+
+
+- JIT (Just In Time)  : It is the default mode, ant it is used by the Java virtual machine to translate bytecode into platform-dependent
+     machine code at runtime, it generates machine code during the execution of the program itself.
+     The objective of a JIT compiler is to generate high-quality machine code as fast as possible. because of the runtime information,
+     JIT compilers perform much more sophisticated optimizations than the javac compiler (platform independent), these optimizations
+     improve performance.
+
+- AOT (Ahead Of Time) : It generates machine code before the execution of the program (during the bytecode verification and build
+     phase of the application). that leads into a very fast execution and optimal resource consumption with less CPU and memory.
+     Using its native-image technology. It receives as input all classes from the application, libraries, the JDK, and the Java virtual
+     machine, and then produce a native image executable that can be shipped and deployed directly in a container.
+     . Use a fraction of the resources required by the JVM.
+     . Applications start in milliseconds.
+     . Deliver peak performance immediately, no warmup.
+     . Can be packaged into lightweight container images for faster and more efficient deployments.
+     . Reduced attack surface (exclude all the unused code & tools).
+
+
+
+
+
+
+

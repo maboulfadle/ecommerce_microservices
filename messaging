@@ -1,0 +1,133 @@
+Event-driven microservices can be built using event-driven architecture producing and consuming events using async communication, event brokers,
+spring cloud function and spring cloud stream.
+
+Event-driven microservices are an architecture pattern where services communicate with each other by emitting and responding to events, rather than
+making direct synchronous calls (such as HTTP requests). This approach provides better decoupling, scalability, and responsiveness for distributed
+systems, as each service reacts independently to the events they subscribe to.
+
+Concepts of Event-driven microservices :
+
+- Events: is a significant change in the system state or some action that has occurred. For example, "Order Placed," "Payment Processed," or
+          "User Registered" are events that microservices can respond to. they are typically immutable and consist of data that describes the state change.
+
+- Producer: a service that emits events when it detects changes (e.g., Order Service emits an "OrderCreated" event).
+
+- Consumer: A service that listens for events and reacts (e.g., Notification Service listens for "OrderCreated" and sends a confirmation email).
+
+- Event Brokers: act as intermediaries between producers and consumers. Common brokers include Apache Kafka, RabbitMQ, AWS SNS/SQS, or Google Pub/Sub.
+                 they provide a message queue or topic system to store and distribute events to interested consumers.
+
+- asynchronous communication: Unlike REST-based microservices, where requests and responses are synchronous, event-driven microservices communicate
+                              asynchronously. Producers don’t wait for consumers to respond—they simply publish events.
+
+- Event Types: which could be domain events that signal something meaningful has happened in a domain (e.g., "User Registered" or "Order Shipped"). Or
+               an integration events that notify other systems when something important has happened, enabling communication across multiple microservices.
+
+
+
+
+
+
+Event-driven architecture could be build using 2 primary models :
+
+- Publisher/Subscriber (PubSub) model : frequently paired with Rabbitmq as a popular option, this model revolves around subscriptions. Producers generate
+                                        events that are distributed to all subscribers for consumption. once an event is received, it cannot be replayed,
+                                        which means new subscribers joining later will not have access to past events.
+
+- Event streaming model : frequently paired with Kafka as a popular option, in this model, events are written to a log in a sequential manner. Producers publish events as they occur, and these events are
+                          stored in a well-ordered fashion. Instead of subscribing to events, consumers have the ability to read from any part of the events
+                          stream. Once advantage of this model is these events could be replayed, allowing clients to join at any time and receive all past
+                          events.
+
+
+
+
+
+
+
+
+
+Rabbitmq :
+Rabbitmq is an open source message broker, it is recognized for its use of AMQP (advanced message queuing protocol) and its ability to offer flexible
+asynchronous messaging, distributed deployment and comprehensive monitoring.
+It has the following concepts :
+
+- Producer : or the publisher, is the entity responsible for sending messages (events) into the message broker.
+
+- Consumer : or the subscriber, is the entity responsible for receiving messages from the message broker and process them.
+
+- Message broker : the middleware that receives the messages from the producer and push them to the Queue and then notify the appropriate  consumer
+                   to process the messages.
+
+
+The messaging model of AMQP operates on the principal of exchange/queues, first the producer send a message to one of the exchange inside the message
+broker, and based on the specified routing rules, rabbitmq determines the queues that should receive a copy of the message. and then the consumers
+(subscribed to one or more queues) read the messages from the queues and then the message get deleted from the queues.
+
+
+
+
+
+
+
+
+Spring Cloud Function :
+spring cloud function is a spring cloud project designed to support the development of serverless and function-based applications in a cloud-native way.
+It used to write business logic as discrete functions and deploy them across different cloud providers.
+It abstracts cloud-specific details and offers a functional programming model based on Java functions.
+
+Spring Cloud Function provides three main types of functions:
+- Function<I, O> : it takes an input of type I and produces an output of type O.
+- Consumer<I>    : it takes an input of type I and performs some operation but doesn’t return a result.
+- Supplier<O>    : it does not take any input but returns an output of type O.
+
+
+
+
+
+
+
+Spring Cloud Stream :
+spring cloud stream is a framework within the Spring Cloud that facilitates building highly scalable, event-driven microservices using messaging
+systems like apache kafka, Rabbitmq. It provides an abstraction over message brokers, simplifying the development of applications that use
+distributed messaging patterns.
+
+spring cloud stream allows you to define input and output channels for your microservices and automatically binds them to a message broker, handling
+all the complexities of communication, serialization, and deserialization.
+
+The core building lines of spring cloud stream are :
+- Binder: is an abstraction for connecting spring cloud stream applications to message brokers. It acts as the bridge between the spring application
+          and messaging platforms. For instance the rabbitmq binder bridges the exchanges and spring cloud stream.
+
+- Destination: this is where messages are published or consumed from (e.g., a Kafka topic or RabbitMQ exchange/queue).
+
+- Message Channel: that are used for communication between microservices. channels can be input Channel where messages are consumed and output Channel
+                   where messages are published.
+
+- Bindings: that connect the message channels (input/output) to destinations like Kafka topics or RabbitMQ exchanges. This binding is configured
+            declaratively in the application.yml or application.properties files.
+
+- Message: is the actual payload sent between services, which can include headers and metadata.
+
+- Processor: is a combination of a Source (producer) and Sink (consumer), where data is absorbed, processed, and then output.
+
+
+
+
+
+
+
+
+KaFka :
+is a distributed streaming platform that allows producers to send events or stream of data records to topics and then consumers are going to receives those events.
+It has so many concepts :
+- Connect Source : used for data integration, it pulls data from a datasource into KaFka system.
+- Connect Sinks  : used for data integration, it pulls data from KaFka system into a datasource.
+- Stream API     : a data processing and transformation library (filtering, grouping, aggregating, joining and more).
+
+
+
+
+
+The difference between kafka and rabbitmq is that in kafka the messages when they are sent to topics they dont disappear, so they can stay there
+for a couple of minutes, hours or even forever, whereas in the traditional message queue the messages are gone as soon as they are consumed.

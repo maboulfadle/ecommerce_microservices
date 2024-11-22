@@ -1,0 +1,93 @@
+# Spring boot profiles configuration, the below configuration should be added in the application.yml,
+# and in each application profiles, 'spring.config.activate.on-profile' should contains profile (qa, prod)
+spring:
+  config:
+    import:
+      - application_qa.yml
+      - application_prod.yml
+  profiles:
+    active: prod
+
+
+
+
+
+# To read configuration properties from classpath, the following configuration should be updated
+spring:
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations:
+            - 'classpath:/configurations/products/'
+            - 'classpath:/configurations/orders/'
+
+
+
+
+
+# To read configuration properties from a git repo, the following configuration should be updated
+spring:
+  profiles:
+    active: git
+  cloud:
+    config:
+      server:
+        git:
+          uri: 'https://gitbub.com/repo/...'
+        default-label : branch
+        timeout: 5
+        clone-on-start: true
+        force-pull: true
+
+
+
+
+# In order to refresh the configuration properties at runtime, you can use actuator, once the configuration is changed inside a git repo,
+# or changed in file system and rerun the config server microservice, the we need to hit the endpoint 'http://localhost:8080/actuator/refresh'
+# in case of products microservice, But this approach is not ideal because you have to refresh all the instances.
+# To enable the management endpoints (actuator, monitor...), the following configuration should be added in the target microservice :
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+
+
+
+# To overcome this challenge, the spring cloud bus project comes to picture, based on a lightweight message broker (rabbitmq that should be installed).
+# Using this tool, all you need is to to hit the endpoint 'http://localhost:8080/actuator/busrefresh' on one instance, and then all the other
+# subscribed nodes should be refreshed. But this approach requires some manuel setup as you need to frequently bus refresh an instance
+spring:
+   rabbitmq:
+     host: 'localhost'
+     port: 5672
+     username: 'guest'
+     password: 'guest'
+
+
+
+
+# In order to automate the config refresh, you can use the spring cloud monitor inside the config server pom.xml (to expose the /monitor endpoint)
+# and in case of git repo config server, you can use the webhook that send a configured request once the repo changed, in our case the request
+# should be 'http://localhost:8071/monitor'
+# but in case of local development, you cannot simply add an url containing localhost, so the hookdeck tools comes to solve this issue.
+
+
+
+
+# In order to get the information about the readiness (is the microservice ready to handle network traffic) & liveness (is the microservice alive/dead)
+# of a microservice :
+management:
+  health:
+    liveness-state:
+      enabled: true
+    readiness-state:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true

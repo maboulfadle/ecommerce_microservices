@@ -1,0 +1,83 @@
+Inside the microservices network there are cloud native applications. the IP addresses will be dynamically changing because the number
+of the instances are going to change and they could have dynamic assigned IP addresses, whenever the auto scaling is performed
+or in the scenarios of failures.
+
+In these kind of dynamic situations, the service discovery & registration pattern, is a way to locate each other on a network.
+The essential component of the service discovery & registration pattern is :
+     - Central server(s): that maintains a global view of IP addresses,
+                          whenever a microservice instance get started, it has to connect and communicate the IP address and port
+                          details to the central server that maintain these information inside a service registry.
+                          and once the microservice is started, the central server expects a regular heartbeats from it to confirm
+                          the service health, if it is not receiving he regular heartbeats, then it assumes the health of a particular microservice
+                          instance is not good and it is going to delete its IP details and all the address details from the service registry, and similarly,
+                          whenever the microservices are being shut down or removed.
+
+
+
+
+
+
+# The client-side service discovery :
+The client-side service discovery is an architectural pattern where client application are responsible for location and connecting to services
+they depend on. In this approach, the client application connect directly with a service registry to discover the available service instances
+and get the necessary information to establish connections.
+
+If a microservice X want to communicate with a backing microservice Y, first it will check  the local for the service instances IPs, if true, it will
+invokes the backing service directly, otherwise it will need to queries the service discovery to get the associated IP addresses of microservice Y.
+If multiple instances of Y are available inside the registry, the registry is going to return the list of IP addresses to the client
+microservice X which has the responsibility to select one of the IP addresses based on its own defined load-balance strategy that
+can be implemented using various algorithms such us round-robin.
+
+The service discovery layer, contains one or more nodes that communicate between them about the health of the services instances.
+
+
+
+
+
+
+# The service registry :
+The service registry is a database or a centralized directory that holds the information (e.g., IP addresses, ports, metadata) about the available
+services running in a microservices architecture.
+
+when the service starts, it registers its location and metadata in the service registry. and when the service stops or is no longer available,
+it will be removed from the registry, or the registry detects it as unavailable through health checks.
+
+
+
+
+
+# The service Discovery
+The service discovery is the process by which a service (client) finds the network locations (IP addresses, ports) of other services it needs to interact with.
+Functionalities :
+    - Lookup: The service discovery mechanism queries the service registry to find the instances of the required service.
+    - Dynamic binding: It allows services to discover and communicate with each other without needing hard-coded IP addresses or endpoints.
+
+Types:
+    - Client-Side Discovery: The client service is responsible for querying the service registry to find the target service.
+    - Server-Side Discovery: An intermediary, like a load balancer, queries the service registry and forwards the client's
+                             request to the appropriate service instance.
+
+
+
+
+
+
+# Load Balancer :
+In a microservices architecture, where services are typically deployed as multiple instances across different servers or containers,
+a load balancer sits between the client (or other services) and the service instances. It plays a critical role in ensuring the distribution
+of incoming network traffic across multiple service instances or servers to ensure no single instance is overwhelmed.
+
+For example, if you have a microservice called UserService running on three instances, the load balancer will distribute incoming requests
+to these instances based on the configured load balancing algorithm (e.g., round-robin, least connections, etc.), ensuring that no single
+instance becomes a bottleneck.
+
+
+
+
+
+
+# Projects
+For service discovery            : spring cloud netflix eureka (there are other products like apache zookeeper, consul...)
+For load balancing               : spring cloud load balancer (there are other products like netflix ribbon but it is not maintained anymore)
+For microservice's communication : netflix feign client
+For Fault tolerance              : (ability to run in case of failure) Resilience4j
